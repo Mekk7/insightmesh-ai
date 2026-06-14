@@ -181,7 +181,8 @@ except Exception:
 
 # 4) NLP & ML imports
 from langdetect import detect
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import pipeline, AutoModelForSeq2SeqLM
+from transformers import MarianTokenizer
 from transformers import pipeline as zpipeline
 from keybert import KeyBERT
 import spacy
@@ -263,7 +264,7 @@ sentiment_pipe = pipeline(
 )
 
 # Translate non-EN → EN for normalization
-tokenizer     = AutoTokenizer.from_pretrained("Helsinki-NLP/opus-mt-mul-en")
+tokenizer     = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-mul-en")
 seq2seq_model = AutoModelForSeq2SeqLM.from_pretrained("Helsinki-NLP/opus-mt-mul-en")
 
 # Keyphrase extraction

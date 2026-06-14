@@ -73,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
     CMD curl -fsS http://localhost:${PORT:-8000}/ping || exit 1
 
 # Use uvicorn workers via env; default to 2 workers
-CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2"
+CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1"
