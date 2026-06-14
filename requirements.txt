@@ -7,6 +7,7 @@
 # After installing, also run:
 #   python -m spacy download en_core_web_sm
 # ============================================================
+sentencepiece
 
 # --- Core web framework ---
 fastapi>=0.110.0,<1.0
