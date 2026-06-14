@@ -1,0 +1,76 @@
+# ============================================================
+# InsightMesh AI — Backend Dockerfile
+# ============================================================
+# Notes:
+#   - Multi-stage to keep the final image leaner.
+#   - Heavy ML deps (torch, transformers, sentence-transformers, bertopic,
+#     prophet, ydata-profiling) make this image LARGE (~5–8 GB). If you don't
+#     need analysis on the same container as scraping/forecasting, split into
+#     services and skip the unused deps via build args.
+# ============================================================
+
+# ---- Stage 1: builder (compile native deps) ----
+FROM python:3.11-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# System deps needed to build hdbscan, prophet, etc.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        g++ \
+        gfortran \
+        git \
+        curl \
+        libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Install Python deps to a target dir (so we can copy only what's needed)
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt && \
+    python -m spacy download en_core_web_sm
+
+# ---- Stage 2: runtime ----
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH=/root/.local/bin:$PATH \
+    PYTHONPATH=/app
+
+# Minimal runtime libs (libgomp for sklearn/numpy, curl for healthcheck)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libgomp1 \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Bring over installed wheels + spacy model from builder
+COPY --from=builder /root/.local /root/.local
+
+# App code
+COPY backend ./backend
+
+# Data directories (matching the code's expectations)
+RUN mkdir -p backend/data/raw backend/data/processed
+
+# Default env (override at runtime via -e or compose `environment:`)
+ENV BASE_URL=http://0.0.0.0:8000 \
+    API_PREFIX=/api \
+    LOG_LEVEL=INFO \
+    INSIGHTMESH_DB_PATH=/app/backend/data/insightmesh.db
+
+EXPOSE 8000
+
+# Healthcheck pings the API ping endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -fsS http://localhost:8000/ping || exit 1
+
+# Use uvicorn workers via env; default to 2 workers
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

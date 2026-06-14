@@ -1,0 +1,72 @@
+[
+  {
+    "label": "iPhone 16 Pro",
+    "query": "iPhone 16 Pro",
+    "runId": 11,
+    "reviews": 40,
+    "seconds": 18
+  },
+  {
+    "label": "Tesla Model Y",
+    "query": "Tesla Model Y review",
+    "runId": 13,
+    "reviews": 37,
+    "seconds": 760
+  },
+  {
+    "label": "Sony WH-1000XM5",
+    "query": "Sony WH-1000XM5",
+    "runId": 14,
+    "reviews": 44,
+    "seconds": 799
+  },
+  {
+    "label": "PlayStation 5",
+    "query": "PlayStation 5 review",
+    "runId": 16,
+    "reviews": 34,
+    "seconds": 1293
+  },
+  {
+    "label": "Apple Vision Pro",
+    "query": "Apple Vision Pro",
+    "runId": 17,
+    "reviews": 35,
+    "seconds": 182
+  },
+  {
+    "label": "NVIDIA RTX 4090",
+    "query": "RTX 4090 review",
+    "runId": 19,
+    "reviews": 34,
+    "seconds": 1251
+  },
+  {
+    "label": "Samsung Galaxy S24 Ultra",
+    "query": "Galaxy S24 Ultra review",
+    "runId": 21,
+    "reviews": 34,
+    "seconds": 1055
+  },
+  {
+    "label": "Meta Quest 3",
+    "query": "Meta Quest 3",
+    "runId": 22,
+    "reviews": 37,
+    "seconds": 502
+  },
+  {
+    "label": "Xbox Series X",
+    "query": "Xbox Series X",
+    "runId": 11,
+    "reviews": 40,
+    "seconds": 633
+  },
+  {
+    "label": "MacBook Pro M3",
+    "query": "MacBook Pro M3",
+    "runId": 23,
+    "reviews": 32,
+    "seconds": 654
+  }
+]

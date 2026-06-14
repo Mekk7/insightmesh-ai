@@ -1,0 +1,130 @@
+# ============================================================
+# InsightMesh AI — CI
+# ============================================================
+# Runs on push/PR to main. Three independent jobs:
+#   - lint-backend     (ruff)
+#   - test-backend     (fast pytest suite — slow tests are excluded by default)
+#   - frontend         (lint + vitest)
+# ============================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel in-flight runs when a new commit lands on the same ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # --------------- Backend: lint --------------------------------------
+  lint-backend:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install ruff
+      - run: ruff check backend tests
+
+  # --------------- Backend: fast pytest suite -------------------------
+  test-backend:
+    name: Test (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install minimal test deps
+        # Skip heavy ML deps for CI fast tests — the slow suite is opt-in.
+        # We install only what the fast suite touches.
+        run: |
+          pip install --upgrade pip
+          pip install fastapi 'pydantic>=2.5' python-dotenv \
+                      pandas numpy python-dateutil \
+                      'scikit-learn>=1.3' \
+                      langdetect httpx \
+                      pytest pytest-asyncio pytest-cov
+
+      - name: Run fast suite
+        env:
+          CG_USE_SEMANTICS: "0"        # don't load sentence-transformers in CI
+          PYTHONUNBUFFERED: "1"
+        run: pytest -v --cov=backend --cov-report=xml --cov-report=term
+
+      - name: Upload coverage
+        if: matrix.python == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+        continue-on-error: true
+
+  # --------------- Frontend: lint + tests -----------------------------
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: insightmesh-fe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: insightmesh-fe/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # --------------- Docker build smoke test ----------------------------
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    # Only run on main (heavy)
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build backend image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.backend
+          push: false
+          tags: insightmesh-backend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build frontend image (no push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.frontend
+          push: false
+          tags: insightmesh-frontend:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

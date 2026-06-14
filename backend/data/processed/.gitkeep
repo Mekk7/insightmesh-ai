@@ -1,0 +1,2 @@
+# Keeps this directory in the repo. Generated profile HTMLs are gitignored,
+# but the folder itself needs to exist for the backend to write reports here.

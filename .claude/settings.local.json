@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(ollama list *)",
+      "PowerShell(Select-String -Path D:\\\\IM_AI_folder\\\\.env -Pattern \"OLLAMA_MODEL|OLLAMA_URL|OPENAI_API_KEY\" ; \"---dotenv load?---\"; Select-String -Path D:\\\\IM_AI_folder\\\\backend\\\\main.py -Pattern \"dotenv|load_dotenv|.env\" | Select-Object -First 5)",
+      "PowerShell(d:\\\\IM_AI_folder\\\\myenv\\\\Scripts\\\\python.exe -m backend.insight.deep_classify._ps5_smoke_test)",
+      "PowerShell(d:\\\\IM_AI_folder\\\\myenv\\\\Scripts\\\\python.exe -m backend.insight.deep_classify._raw_probe)",
+      "PowerShell(d:\\\\IM_AI_folder\\\\myenv\\\\Scripts\\\\python.exe -c \"import backend.api.insightmesh.ask; import backend.insight.debate.evidence_store; import backend.insight.deep_classify.classifier; print\\('all imports OK'\\)\")",
+      "PowerShell(Select-String -Path D:\\\\IM_AI_folder\\\\.env -Pattern \"REDDIT_CLIENT_ID|REDDIT_CLIENT_SECRET|REDDIT_USER_AGENT|REDDIT_USERNAME|REDDIT_PASSWORD\" | ForEach-Object { \\($_ -split \"=\"\\)[0] + \"=\" + $\\(if \\(\\($_ -split \"=\",2\\)[1].Trim\\(\\)\\) {\"<set>\"} else {\"<blank>\"}\\) })",
+      "PowerShell(Get-Process *)",
+      "PowerShell($ol = Get-Command ollama -ErrorAction SilentlyContinue; if \\($ol\\) { Write-Output \"ollama found: $\\($ol.Source\\)\"; ollama list } else { Write-Output \"ollama NOT on PATH\" })",
+      "PowerShell(Get-ChildItem -Path D:\\\\IM_AI_folder -File -Force | Select-Object Name; \"---FE---\"; Get-ChildItem -Path D:\\\\IM_AI_folder\\\\insightmesh-fe -File -Force | Select-Object Name; \"---BACKEND---\"; Get-ChildItem -Path D:\\\\IM_AI_folder\\\\backend -File -Force | Select-Object Name; \"---DOCS---\"; Get-ChildItem -Path D:\\\\IM_AI_folder\\\\docs -File -Force -ErrorAction SilentlyContinue | Select-Object Name)"
+    ]
+  }
+}

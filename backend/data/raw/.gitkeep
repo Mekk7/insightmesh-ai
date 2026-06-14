@@ -1,0 +1,2 @@
+# Keeps this directory in the repo. Generated raw CSVs are gitignored,
+# but the folder itself needs to exist for the backend to write uploads here.

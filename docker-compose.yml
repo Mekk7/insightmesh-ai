@@ -1,0 +1,74 @@
+# ============================================================
+# InsightMesh AI — docker-compose
+# ============================================================
+# Usage:
+#   docker compose up --build              # foreground
+#   docker compose up -d --build           # detached
+#   docker compose logs -f backend         # follow logs
+#   docker compose down                    # stop & remove
+#   docker compose down -v                 # also wipe volumes (history!)
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: insightmesh-backend:latest
+    container_name: insightmesh-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      BASE_URL: http://0.0.0.0:8000
+      API_PREFIX: /api
+      LOG_LEVEL: INFO
+      CORS_ORIGINS: "*"                       # tighten in prod
+      INSIGHTMESH_DB_PATH: /app/backend/data/insightmesh.db
+      # Cache tuning
+      PIPELINE_CACHE_TTL_SEC: "900"
+      PIPELINE_CACHE_SIZE: "64"
+      SCRAPER_CACHE_TTL_SEC: "1800"
+      SCRAPER_CACHE_SIZE: "256"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist run history & uploaded CSVs across container restarts
+      - insightmesh-data:/app/backend/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/ping"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    networks:
+      - insightmesh
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: /api          # nginx proxies /api → backend
+    image: insightmesh-frontend:latest
+    container_name: insightmesh-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"                        # http://localhost:5173
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - insightmesh
+
+volumes:
+  insightmesh-data:
+    name: insightmesh-data
+
+networks:
+  insightmesh:
+    driver: bridge

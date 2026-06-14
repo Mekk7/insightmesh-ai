@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insightmesh-ai"
+version = "0.2.0"
+description = "AI-driven product/customer feedback intelligence — scrape, analyze, forecast"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [
+    { name = "InsightMesh AI" }
+]
+keywords = ["nlp", "sentiment", "clustering", "forecasting", "fastapi", "review-analysis"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# Runtime deps live in requirements.txt for now; mirror them here once the
+# project stabilizes.
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.1",
+    "ruff>=0.3",
+    "black>=24.0",
+    "mypy>=1.9",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501", "B008"]  # long lines OK (we have wide tables); FastAPI uses Depends() in defaults
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+# Default: skip slow tests (those needing transformers/ML model downloads).
+# Run them with: pytest -m slow  or  pytest -m ""
+addopts = "-m 'not slow' -ra --strict-markers"
+markers = [
+    "slow: marks tests as slow (they may download HuggingFace/transformer models)",
+    "integration: marks tests that hit external services",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true   # too many untyped scientific libs
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*"]
+exclude = ["myenv*", "tests*", "DOWNLOADS*"]

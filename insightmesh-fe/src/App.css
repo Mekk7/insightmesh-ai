@@ -1,0 +1,16 @@
+/*
+ * InsightMesh AI — global styles
+ *
+ * The dashboard relies on Tailwind utility classes for almost everything.
+ * Keep this file MINIMAL. Add component-specific CSS in component files
+ * (or inline Tailwind), not here.
+ *
+ * The Vite scaffold defaults (logo spin animations, default root padding)
+ * were removed when this became a real app.
+ */
+
+/* Override Vite's default centering — we want a wide app shell, not a centered card */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
