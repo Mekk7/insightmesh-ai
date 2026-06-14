@@ -1,9 +1,10 @@
 // src/lib/api.js
 // Shared API client. Single source of truth for the backend base URL.
 import axios from "axios";
+import API_BASE from "../api.js";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || `${API_BASE}/api`,
   timeout: Number(import.meta.env.VITE_API_TIMEOUT ?? 0),
 });
 

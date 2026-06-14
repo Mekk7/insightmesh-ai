@@ -29,13 +29,15 @@ Build-time variables (prefixed with `VITE_`):
 
 | Var | Default | Notes |
 |---|---|---|
-| `VITE_API_BASE_URL` | `/api` | Where the dashboard sends requests. Use `/api` to keep things behind the Vite proxy. |
+| `VITE_API_URL` | `` (empty) | Backend ORIGIN — no trailing slash, no `/api` suffix. Set in production (Vercel) to the Railway URL, e.g. `https://insightmesh-ai-production.up.railway.app`. Empty locally so requests stay relative (`/api`) behind the Vite dev proxy. |
+| `VITE_API_BASE_URL` | _(unset)_ | Optional override of the full base (including `/api`). Takes precedence over `VITE_API_URL` when set. |
 | `VITE_API_TIMEOUT` | `0` (no timeout) | Axios timeout in ms |
 
-Set them in a `.env.local` (gitignored) or pass at build time:
+Set them in a `.env.local` (gitignored) or in the Vercel project settings:
 
 ```bash
-VITE_API_BASE_URL=https://api.yourdomain.com npm run build
+# Production (Vercel) — note: NO trailing slash, NO /api
+VITE_API_URL=https://insightmesh-ai-production.up.railway.app
 ```
 
 ## Structure

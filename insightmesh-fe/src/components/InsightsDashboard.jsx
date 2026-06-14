@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import API_BASE from "../api.js";
 
 function classNames(...xs) {
   return xs.filter(Boolean).join(" ");
@@ -22,7 +23,7 @@ const CATEGORY_COLORS = {
 };
 
 export default function InsightsDashboard({
-  apiBase = import.meta.env.VITE_API_BASE_URL || "/api",
+  apiBase = import.meta.env.VITE_API_BASE_URL || `${API_BASE}/api`,
   defaultQuery = "Tesla Model Y",
 }) {
   const [query, setQuery] = useState(defaultQuery);

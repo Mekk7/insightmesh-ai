@@ -19,6 +19,7 @@ import ComparePanel from "./components/ComparePanel.jsx";
 import ProgressStrip from "./components/ProgressStrip.jsx";
 import Insights from "./components/Insights.jsx";
 import LandingPage from "./components/LandingPage.jsx";
+import API_BASE from "./api.js";
 import { exportReportMd, exportReportHtml, downloadBlob, streamPipeline } from "./lib/api.js";
 
 /**
@@ -34,7 +35,7 @@ import { exportReportMd, exportReportHtml, downloadBlob, streamPipeline } from "
  */
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || `${API_BASE}/api`,
   timeout: Number(import.meta.env.VITE_API_TIMEOUT ?? 0),
 });
 
