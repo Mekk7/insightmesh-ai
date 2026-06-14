@@ -8,7 +8,9 @@ instead of analyzing the N longest/first comments, it greedily selects high-valu
 comments that also cover DIFFERENT topics, so the dashboard reflects the breadth
 of feedback rather than a redundant pile of the same complaint.
 
-Target count comes from the depth preset (Quick 15 / Balanced 40 / Deep 80).
+Target count comes from the depth preset's target_useful_reviews
+(Quick 15 / Balanced 50 / Deep 80). When fewer candidates exist than the
+target, smart_sample returns them all (no cap) — see the n <= target guard.
 """
 import logging
 import re

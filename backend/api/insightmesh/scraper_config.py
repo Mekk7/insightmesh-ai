@@ -133,9 +133,14 @@ DEPTH_PRESETS: Dict[str, Dict[str, Any]] = {
         "coverage": {"enabled": False},
     },
     "balanced": {
-        "youtube": {"max_videos": 6, "max_comments_per_video": 40, "fetch_replies": True, "query_variants": 3},
-        "reddit":  {"max_threads": 8, "max_comments_per_thread": 25, "include_replies": True, "query_variants": 3, "sort_modes": ["relevance", "top"]},
-        "appstore": {"max_reviews": 35, "countries": ["us", "gb"]},
+        # Scrape volume bumped so the raw candidate pool comfortably exceeds the
+        # target_useful_reviews of 50 even after heavy noise/low-value/relevance
+        # filtering and source rate-limiting (e.g. datacenter IPs on Railway).
+        # max_raw_fetch (400) still caps total raw; this just fills that budget
+        # with more diverse comments per source instead of bottoming out thin.
+        "youtube": {"max_videos": 8, "max_comments_per_video": 70, "fetch_replies": True, "query_variants": 4},
+        "reddit":  {"max_threads": 12, "max_comments_per_thread": 40, "include_replies": True, "query_variants": 4, "sort_modes": ["relevance", "top", "new"]},
+        "appstore": {"max_reviews": 50, "countries": ["us", "gb"]},
         # target 50 + a 400-raw budget so heavy upstream filtering still leaves
         # 40-50 analyzable reviews (the top-up scrape in stream.py backfills a thin pool).
         "targets": {"min_useful_reviews": 25, "target_useful_reviews": 50, "max_raw_fetch": 400},
