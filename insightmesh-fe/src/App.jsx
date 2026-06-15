@@ -2044,22 +2044,23 @@ export default function App() {
   const [rerunSeed, setRerunSeed] = useState(null);     // Pre-fill InsightsPanel with these params
 
   // Hook from LandingPage → enter the dashboard and either load a pre-cached
-  // featured run by id (instant, no scraping/analysis) or, only for a genuinely
-  // NEW product not in the featured list, kick off a live Balanced run.
-  const onLaunch = ({ query, runId }) => {
-    // If no explicit runId came from a card, see if the typed query matches a
-    // featured product — if so, load its SAVED run instead of re-analyzing.
-    let effectiveRunId = runId;
-    if (!effectiveRunId && query) {
+  // featured product from its STATIC saved report (instant, no backend/scraping/
+  // analysis) or, only for a genuinely NEW product not in the featured list,
+  // kick off a live Balanced run.
+  const onLaunch = ({ query, slug }) => {
+    // If no explicit slug came from a card, see if the typed query matches a
+    // featured product — if so, load its saved static report instead of re-analyzing.
+    let effectiveSlug = slug;
+    if (!effectiveSlug && query) {
       const q = query.trim().toLowerCase();
       const match = FEATURED.find(
         (f) => f.query.toLowerCase() === q || f.label.toLowerCase() === q
       );
-      if (match) effectiveRunId = match.runId;
+      if (match) effectiveSlug = match.slug;
     }
-    if (effectiveRunId) {
-      // Featured / known product → load the saved result by run id (GET /history/{id}).
-      setRerunSeed({ loadRunId: effectiveRunId, query, analysis_depth: "balanced" });
+    if (effectiveSlug) {
+      // Featured / known product → load the saved static report (no backend call).
+      setRerunSeed({ loadReportUrl: `/featured/${effectiveSlug}.json`, query, analysis_depth: "balanced" });
     } else if (query) {
       // Genuinely new product → live Balanced analysis.
       setRerunSeed({ query, autoRun: true, analysis_depth: "balanced" });

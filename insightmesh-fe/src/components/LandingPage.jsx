@@ -113,14 +113,14 @@ export default function LandingPage({ onLaunch }) {
             {FEATURED.map((p) => (
               <button
                 key={p.label}
-                onClick={() => onLaunch({ query: p.query, runId: p.runId })}
+                onClick={() => onLaunch({ query: p.query, slug: p.slug })}
                 className="group flex flex-col items-start gap-2 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-4 text-left transition hover:border-blue-700/70 hover:bg-zinc-900"
               >
                 <div className="text-2xl">{p.emoji}</div>
                 <div className="text-sm font-semibold text-zinc-100">{p.label}</div>
                 <div className="text-[11px] text-zinc-500">{p.tagline}</div>
                 <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-medium">
-                  {p.runId ? (
+                  {p.slug ? (
                     <span className="rounded bg-emerald-900/40 px-1.5 py-0.5 text-emerald-300 ring-1 ring-emerald-800/60">⚡ instant</span>
                   ) : (
                     <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400 ring-1 ring-zinc-700">live ~90s</span>

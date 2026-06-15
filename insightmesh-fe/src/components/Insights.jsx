@@ -417,7 +417,38 @@ export default function Insights({ rerunSeed = null, onRerunConsumed = () => {} 
   useEffect(() => {
     if (!rerunSeed) return;
 
-    // --- Featured / saved run: load the persisted report INSTANTLY (no recompute) ---
+    // --- Featured product: load the saved STATIC report (no backend call) ---
+    // Reads /featured/<slug>.json straight from the site (Vercel static). This is
+    // redeploy-proof and never triggers scraping/analysis. Errors surface cleanly.
+    if (rerunSeed.loadReportUrl) {
+      setInputMode("search");
+      if (rerunSeed.query) setQuery(rerunSeed.query);
+      if (rerunSeed.analysis_depth) setAnalysisDepth(rerunSeed.analysis_depth);
+      setErr(null);
+      setDemoMode(false);
+      setRes(null);
+      setLoading(true);
+      const _label = rerunSeed.query || "this product";
+      (async () => {
+        try {
+          const resp = await fetch(rerunSeed.loadReportUrl, { headers: { Accept: "application/json" } });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const report = await resp.json();
+          if (!report.meta) report.meta = {};
+          if (rerunSeed.query) report.meta.query_used = rerunSeed.query;
+          setRes(report);
+          setLastRunAt(nowISOShort());
+        } catch (e) {
+          setErr(`Couldn't load the saved result for "${_label}" (${e?.message || "request failed"}).`);
+        } finally {
+          setLoading(false);
+        }
+      })();
+      onRerunConsumed();
+      return;
+    }
+
+    // --- Featured / saved run by id (legacy): load the persisted report INSTANTLY ---
     if (rerunSeed.loadRunId) {
       setInputMode("search");
       if (rerunSeed.query) setQuery(rerunSeed.query);
