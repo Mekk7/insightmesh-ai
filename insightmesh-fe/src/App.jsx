@@ -19,6 +19,7 @@ import ComparePanel from "./components/ComparePanel.jsx";
 import ProgressStrip from "./components/ProgressStrip.jsx";
 import Insights from "./components/Insights.jsx";
 import LandingPage from "./components/LandingPage.jsx";
+import { FEATURED } from "./featured.js";
 import API_BASE from "./api.js";
 import { exportReportMd, exportReportHtml, downloadBlob, streamPipeline } from "./lib/api.js";
 
@@ -2043,11 +2044,24 @@ export default function App() {
   const [rerunSeed, setRerunSeed] = useState(null);     // Pre-fill InsightsPanel with these params
 
   // Hook from LandingPage → enter the dashboard and either load a pre-cached
-  // featured run by id (instant) or kick off a live Balanced run for a free search.
+  // featured run by id (instant, no scraping/analysis) or, only for a genuinely
+  // NEW product not in the featured list, kick off a live Balanced run.
   const onLaunch = ({ query, runId }) => {
-    if (runId) {
-      setRerunSeed({ loadRunId: runId, query, analysis_depth: "balanced" });
+    // If no explicit runId came from a card, see if the typed query matches a
+    // featured product — if so, load its SAVED run instead of re-analyzing.
+    let effectiveRunId = runId;
+    if (!effectiveRunId && query) {
+      const q = query.trim().toLowerCase();
+      const match = FEATURED.find(
+        (f) => f.query.toLowerCase() === q || f.label.toLowerCase() === q
+      );
+      if (match) effectiveRunId = match.runId;
+    }
+    if (effectiveRunId) {
+      // Featured / known product → load the saved result by run id (GET /history/{id}).
+      setRerunSeed({ loadRunId: effectiveRunId, query, analysis_depth: "balanced" });
     } else if (query) {
+      // Genuinely new product → live Balanced analysis.
       setRerunSeed({ query, autoRun: true, analysis_depth: "balanced" });
     }
     setTab("Insights");

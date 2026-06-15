@@ -426,6 +426,7 @@ export default function Insights({ rerunSeed = null, onRerunConsumed = () => {} 
       setDemoMode(false);
       setRes(null);
       setLoading(true);
+      const _label = rerunSeed.query || `run #${rerunSeed.loadRunId}`;
       (async () => {
         try {
           const row = await fetchRun(rerunSeed.loadRunId);
@@ -435,14 +436,15 @@ export default function Insights({ rerunSeed = null, onRerunConsumed = () => {} 
             if (rerunSeed.query) report.meta.query_used = rerunSeed.query;
             setRes(report);
             setLastRunAt(nowISOShort());
-          } else if (rerunSeed.query) {
-            // Saved run had no report — fall back to a live run.
-            pendingAutoRunRef.current = rerunSeed.query;
+          } else {
+            // Featured cards load SAVED results only — never silently trigger a
+            // live re-analysis. If the saved run is unavailable, surface an error
+            // and let the user run a fresh analysis from the search box.
+            setErr(`Saved result for "${_label}" is unavailable. Type the product name above to run a fresh analysis.`);
           }
         } catch (e) {
-          // Saved run missing/unreachable — fall back to a live run.
-          if (rerunSeed.query) pendingAutoRunRef.current = rerunSeed.query;
-          else setErr(e?.response?.data?.detail || e?.message || String(e));
+          const code = e?.response?.status;
+          setErr(`Couldn't load the saved result for "${_label}"${code ? ` (HTTP ${code})` : ""}. Type the product name above to run a fresh analysis.`);
         } finally {
           setLoading(false);
         }
